@@ -14,6 +14,7 @@ import chatRoutes from './routes/chat.routes.js';
 import sessionRoutes from './routes/session.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import uploadRoutes from './routes/upload.routes.js';
+import callRoutes from './routes/call.routes.js';
 
 import { errorHandler } from './middleware/error.middleware.js';
 
@@ -50,6 +51,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/calls', callRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', message: 'Server running' }));
@@ -61,6 +63,17 @@ app.use(errorHandler);
 initSocket(io);
 
 const PORT = process.env.PORT || 5000;
+
+// Handle port already in use
+httpServer.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`❌ Port ${PORT} is already in use. Please close other processes using this port.`);
+    console.error('Try: taskkill /IM node.exe /F');
+    process.exit(1);
+  }
+  throw error;
+});
+
 httpServer.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
